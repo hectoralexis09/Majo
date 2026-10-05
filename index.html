@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control Escolar ITACE</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background: #eefafa;
+        color: #29484d;
+    }
+
+    .login {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #dff7f5, #c9eaf1);
+    }
+
+    .login-box {
+        width: 360px;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px #9cc8cc;
+    }
+
+    .login-box h1 {
+        text-align: center;
+        color: #348b94;
+        margin-bottom: 10px;
+    }
+
+    .login-box p {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 7px 0 12px;
+        border: 1px solid #a9d9dd;
+        border-radius: 6px;
+        background: #f8ffff;
+    }
+
+    button {
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #55b9c0;
+        color: white;
+        margin: 3px;
+    }
+
+    button:hover {
+        background: #3d9da5;
+    }
+
+    .btn-danger {
+        background: #d77c7c;
+    }
+
+    .btn-danger:hover {
+        background: #bd6060;
+    }
+
+    .btn-blue {
+        background: #6baec5;
+    }
+
+    .error {
+        color: #c45c5c;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    #app {
+        display: none;
+    }
+
+    .header {
+        height: 65px;
+        background: #4faab3;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 25px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .container {
+        display: flex;
+        min-height: calc(100vh - 65px);
+    }
+
+    .sidebar {
+        width: 220px;
+        background: #d8f2f1;
+        padding: 15px;
+    }
+
+    .sidebar button {
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        color: #315c61;
+        margin: 4px 0;
+    }
+
+    .sidebar button:hover {
+        background: #b9e3e4;
+    }
+
+    .content {
+        flex: 1;
+        padding: 25px;
+    }
+
+    .section {
+        display: none;
+    }
+
+    .section.active {
+        display: block;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px #c7dddd;
+        border-left: 5px solid #55b9c0;
+    }
+
+    .card h3 {
+        color: #4b8f99;
+        margin-bottom: 10px;
+    }
+
+    .card strong {
+        font-size: 28px;
+    }
+
+    .box {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px #c7dddd;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: white;
+    }
+
+    th {
+        background: #75bfc5;
+        color: white;
+    }
+
+    th, td {
+        padding: 9px;
+        border: 1px solid #c5e0e2;
+        text-align: left;
+    }
+
+    tr:nth-child(even) {
+        background: #f0fafa;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .tag {
+        padding: 5px 8px;
+        border-radius: 5px;
+        background: #d8f2f1;
+        color: #35767c;
+    }
+
+    @media(max-width: 700px) {
+        .container {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+        }
+
+        .sidebar button {
+            width: auto;
+        }
+
+        .content {
+            padding: 12px;
+        }
+
+        table {
+            font-size: 12px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+    <div class="login-box">
+        <h1>Control Escolar</h1>
+        <p>ITACE</p>
+
+        <input type="text" id="usuario" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+
+        <button onclick="iniciarSesion()" style="width:100%;">
+            Iniciar sesión
+        </button>
+
+        <p id="errorLogin" class="error"></p>
+
+        <small>
+            Usuario demo: <b>admin</b><br>
+            Contraseña: <b>1234</b>
+        </small>
+    </div>
+</div>
+
+
+<!-- APLICACIÓN -->
+<div id="app">
+
+    <div class="header">
+        <h1>Control Escolar ITACE</h1>
+        <div>
+            <span id="usuarioActual"></span>
+            <button onclick="cerrarSesion()">Salir</button>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="sidebar">
+
+            <button onclick="mostrar('inicio')">🏠 Inicio</button>
+            <button onclick="mostrar('alumnos')">👨‍🎓 Alumnos</button>
+            <button onclick="mostrar('usuarios')">👤 Usuarios</button>
+            <button onclick="mostrar('materias')">📚 Materias</button>
+            <button onclick="mostrar('calificaciones')">📝 Calificaciones</button>
+            <button onclick="mostrar('asistencias')">📋 Asistencias</button>
+            <button onclick="mostrar('horarios')">🕐 Horarios</button>
+            <button onclick="mostrar('solicitudes')">📄 Solicitudes</button>
+            <button onclick="mostrar('citas')">📅 Citas</button>
+            <button onclick="mostrar('reportes')">📊 Reportes</button>
+
+        </div>
+
+        <div class="content">
+
+            <!-- INICIO -->
+            <section id="inicio" class="section active">
+
+                <h2>Inicio</h2>
+                <p>Bienvenido al Sistema de Control Escolar.</p>
+
+                <div class="cards">
+
+                    <div class="card">
+                        <h3>Alumnos</h3>
+                        <strong id="totalAlumnos">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <h3>Materias</h3>
+                        <strong id="totalMaterias">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <h3>Solicitudes</h3>
+                        <strong id="totalSolicitudes">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <h3>Citas</h3>
+                        <strong id="totalCitas">0</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ALUMNOS -->
+            <section id="alumnos" class="section">
+
+                <h2>Alumnos</h2>
+
+                <div class="box">
+
+                    <h3>Registrar alumno</h3>
+
+                    <div class="form-grid">
+
+                        <input id="matricula" placeholder="Matrícula">
+                        <input id="nombre" placeholder="Nombre">
+                        <input id="apellido" placeholder="Apellido">
+                        <input id="grado" placeholder="Grado">
+                        <input id="grupo" placeholder="Grupo">
+                        <input id="correo" placeholder="Correo">
+                        <input id="telefono" placeholder="Teléfono">
+
+                    </div>
+
+                    <button onclick="agregarAlumno()">
+                        Registrar
+                    </button>
+
+                </div>
+
+                <div class="box">
+
+                    <input
+                        id="buscarAlumno"
+                        placeholder="Buscar alumno..."
+                        onkeyup="mostrarAlumnos()"
+                    >
+
+                    <div id="tablaAlumnos"></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- USUARIOS -->
+            <section id="usuarios" class="section">
+
+                <h2>Usuarios</h2>
+
+                <div class="box">
+
+                    <div class="form-grid">
+                        <input id="nuevoUsuario" placeholder="Usuario">
+                        <input id="nuevaPassword" placeholder="Contraseña">
+                        <select id="nuevoRol">
+                            <option>Administrador</option>
+                            <option>Control Escolar</option>
+                            <option>Docente</option>
+                            <option>Estudiante</option>
+                        </select>
+                    </div>
+
+                    <button onclick="agregarUsuario()">
+                        Agregar usuario
+                    </button>
+
+                </div>
+
+                <div class="box">
+                    <div id="tablaUsuarios"></div>
+                </div>
+
+            </section>
+
+
+            <!-- MATERIAS -->
+            <section id="materias" class="section">
+
+                <h2>Materias</h2>
+
+                <div class="box">
+
+                    <div class="form-grid">
+                        <input id="materiaNombre" placeholder="Nombre de materia">
+                        <input id="materiaDocente" placeholder="Docente">
+                    </div>
+
+                    <button onclick="agregarMateria()">
+                        Agregar materia
+                    </button>
+
+                </div>
+
+                <div class="box">
+                    <div id="tablaMaterias"></div>
+                </div>
+
+            </section>
+
+
+            <!-- CALIFICACIONES -->
+            <section id="calificaciones" class="section">
+
+                <h2>Calificaciones</h2>
+
+                <div class="box">
+
+                    <div class="form-grid">
+
+                        <input id="calMatricula" placeholder="Matrícula">
+
+                        <input id="calMateria" placeholder="Materia">
+
+                        <input id="parcial1"
+                               type="number"
+                               min="0"
+                               max="10"
+                               placeholder="Parcial 1">
+
+                        <input id="parcial2"
+                               type="number"
+                               min="0"
+                               max="10"
+                               placeholder="Parcial 2">
+
+                        <input id="parcial3"
+                               type="number"
+                               min="0"
+                               max="10"
+                               placeholder="Parcial 3">
+
+                    </div>
+
+                    <button onclick="agregarCalificacion()">
+                        Guardar calificación
+                    </button>
+
+                </div>
+
+                <div class="box">
+                    <div id="tablaCalificaciones"></div>
+                </div>
+
+            </section>
+
+
+            <!-- ASISTENCIAS -->
+            <section id="asistencias" class="section">
+
+                <h2>Asistencias</h2>
+
+                <div class="box">
+
+                    <div class="form-grid">
+
+                        <input id="asisMatricula"
+                               placeholder="Matrícula">
+
+                        <input id="asisFecha"
+                               type="date">
+
+                        <select id="asisEstado">
+                            <option>Presente</option>
+                            <option>Ausente</option>
+                        </select>
+
+                    </div>
+
+                    <button onclick="agregarAsistencia()">
+                        Registrar asistencia
+                    </button>
+
+                </div>
+
+                <div class="box">
+                    <div id="tablaAsistencias"></div>
+                </div>
+
+            </section>
+
+
+            <!-- HORARIOS -->
+            <section id="horarios" class="section">
+
+                <h2>Horarios</h2>
+
+                <div class="box">
+
+                    <div class="form-grid">
+
+                        <input id="horGrupo" placeholder="Grupo">
+                        <input id="horMateria" placeholder="Materia">
+
+                        <select id="horDia">
+                            <option>Lunes</option>
+                            <option>Martes</option>
+                            <option>Miércoles</option>
+                            <option>Jueves</option>
+                            <option>Viernes</option>
+                        </select>
+
+                        <input id="horInicio"
+                               type="time">
+
+                        <input id="horFin"
+                               type="time">
+
+                    </div>
+
+                    <button onclick="agregarHorario()">
+                        Agregar horario
+                    </button>
+
+                </div>
+
+                <div class="box">
+                    <div id="tablaHorarios"></div>
+                </div>
+
+            </section>
+
+
+            <!-- SOLICITUDES -->
+            <section id="solicitudes" class="section">
+
+                <h2>Solicitudes</h2>
+
+                <div class="box">
+
+                    <div class="form-grid">
+
+                        <input id="solMatricula"
+                               placeholder="Matrícula">
+
+                        <input id="solTipo"
+                               placeholder="Tipo de solicitud">
+
+                        <input id="solFecha"
+                               type="date">
+
+                        <input id="solMotivo"
+                               placeholder="Motivo">
+
+                    </div>
+
+                    <button onclick="agregarSolicitud()">
+                        Registrar solicitud
+                    </button>
+
+                </div>
+
+                <div class="box">
+                    <div id="tablaSolicitudes"></div>
+                </div>
+
+            </section>
+
+
+            <!-- CITAS -->
+            <section id="citas" class="section">
+
+                <h2>Citas</h2>
+
+                <div class="box">
+
+                    <h3>Registrar cita</h3>
+
+                    <div class="form-grid">
+
+                        <input id="citaMatricula"
+                               placeholder="Matrícula">
+
+                        <input id="citaFecha"
+                               type="date">
+
+                        <input id="citaHora"
+                               type="time">
+
+                        <input id="citaMotivo"
+                               placeholder="Motivo">
+
+                        <input id="citaArea"
+                               value="Control Escolar"
+                               placeholder="Área">
+
+                    </div>
+
+                    <button onclick="agregarCita()">
+                        Registrar cita
+                    </button>
+
+                </div>
+
+                <div class="box">
+
+                    <input
+                        id="buscarCita"
+                        placeholder="Buscar cita por matrícula..."
+                        onkeyup="mostrarCitas()"
+                    >
+
+                    <div id="tablaCitas"></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- REPORTES -->
+            <section id="reportes" class="section">
+
+                <h2>Reportes</h2>
+
+                <div class="cards">
+
+                    <div class="card">
+                        <h3>Alumnos activos</h3>
+                        <strong id="repAlumnos">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <h3>Materias</h3>
+                        <strong id="repMaterias">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <h3>Solicitudes</h3>
+                        <strong id="repSolicitudes">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <h3>Citas</h3>
+                        <strong id="repCitas">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="box">
+
+                    <h3>Información del sistema</h3>
+
+                    <p>
+                        Este sistema permite administrar información
+                        básica de Control Escolar.
+                    </p>
+
+                    <br>
+
+                    <p>
+                        Los datos se guardan automáticamente en el
+                        navegador utilizando LocalStorage.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let datos = JSON.parse(localStorage.getItem("controlEscolar"));
+
+if (!datos) {
+
+    datos = {
+
+        usuarios: [
+            {
+                usuario: "Alexis",
+                password: "1234",
+                rol: "Administrador"
+            }
+        ],
+
+        alumnos: [],
+
+        materias: [],
+
+        calificaciones: [],
+
+        asistencias: [],
+
+        horarios: [],
+
+        solicitudes: [],
+
+        citas: []
+
+    };
+
+    guardar();
+
+}
+
+
+function guardar() {
+
+    localStorage.setItem(
+        "controlEscolar",
+        JSON.stringify(datos)
+    );
+
+}
+
+
+function iniciarSesion() {
+
+    let usuario =
+        document.getElementById("usuario").value;
+
+    let password =
+        document.getElementById("password").value;
+
+    let encontrado = datos.usuarios.find(
+        u =>
+        u.usuario === usuario &&
+        u.password === password
+    );
+
+    if (encontrado) {
+
+        document.getElementById("login").style.display =
+            "none";
+
+        document.getElementById("app").style.display =
+            "block";
+
+        document.getElementById("usuarioActual").innerText =
+            encontrado.usuario + " - " + encontrado.rol;
+
+        actualizarTodo();
+
+    } else {
+
+        document.getElementById("errorLogin").innerText =
+            "Usuario o contraseña incorrectos.";
+
+    }
+
+}
+
+
+function cerrarSesion() {
+
+    document.getElementById("app").style.display =
+        "none";
+
+    document.getElementById("login").style.display =
+        "flex";
+
+    document.getElementById("usuario").value = "";
+    document.getElementById("password").value = "";
+
+}
+
+
+function mostrar(id) {
+
+    let secciones =
+        document.querySelectorAll(".section");
+
+    secciones.forEach(
+        s => s.classList.remove("active")
+    );
+
+    document.getElementById(id)
+        .classList.add("active");
+
+    actualizarTodo();
+
+}
+
+
+function agregarAlumno() {
+
+    let matricula =
+        document.getElementById("matricula").value;
+
+    let nombre =
+        document.getElementById("nombre").value;
+
+    let apellido =
+        document.getElementById("apellido").value;
+
+    if (!matricula || !nombre || !apellido) {
+
+        alert("Completa matrícula, nombre y apellido.");
+
+        return;
+
+    }
+
+    if (datos.alumnos.some(a => a.matricula === matricula)) {
+
+        alert("La matrícula ya existe.");
+
+        return;
+
+    }
+
+    datos.alumnos.push({
+
+        matricula: matricula,
+        nombre: nombre,
+        apellido: apellido,
+
+        grado:
+            document.getElementById("grado").value,
+
+        grupo:
+            document.getElementById("grupo").value,
+
+        correo:
+            document.getElementById("correo").value,
+
+        telefono:
+            document.getElementById("telefono").value
+
+    });
+
+    guardar();
+
+    alert("Alumno registrado.");
+
+    document.querySelectorAll(
+        "#alumnos input"
+    ).forEach(i => i.value = "");
+
+    mostrarAlumnos();
+    actualizarTodo();
+
+}
+
+
+function eliminarAlumno(index) {
+
+    if (confirm("¿Eliminar este alumno?")) {
+
+        datos.alumnos.splice(index, 1);
+
+        guardar();
+
+        mostrarAlumnos();
+        actualizarTodo();
+
+    }
+
+}
+
+
+function mostrarAlumnos() {
+
+    let buscar =
+        document.getElementById("buscarAlumno").value
+        .toLowerCase();
+
+    let lista = datos.alumnos.filter(a =>
+        (
+            a.nombre + " " +
+            a.apellido + " " +
+            a.matricula
+        ).toLowerCase().includes(buscar)
+    );
+
+    let html = `
+    <table>
+    <tr>
+        <th>Matrícula</th>
+        <th>Nombre</th>
+        <th>Grado</th>
+        <th>Grupo</th>
+        <th>Correo</th>
+        <th>Acciones</th>
+    </tr>
+    `;
+
+    lista.forEach(a => {
+
+        let index =
+            datos.alumnos.indexOf(a);
+
+        html += `
+        <tr>
+            <td>${a.matricula}</td>
+            <td>${a.nombre} ${a.apellido}</td>
+            <td>${a.grado}</td>
+            <td>${a.grupo}</td>
+            <td>${a.correo}</td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarAlumno(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById("tablaAlumnos").innerHTML =
+        html;
+
+}
+
+
+function agregarUsuario() {
+
+    let usuario =
+        document.getElementById("nuevoUsuario").value;
+
+    let password =
+        document.getElementById("nuevaPassword").value;
+
+    let rol =
+        document.getElementById("nuevoRol").value;
+
+    if (!usuario || !password) {
+
+        alert("Completa los datos.");
+
+        return;
+
+    }
+
+    datos.usuarios.push({
+        usuario,
+        password,
+        rol
+    });
+
+    guardar();
+
+    alert("Usuario agregado.");
+
+    mostrarUsuarios();
+
+}
+
+
+function eliminarUsuario(index) {
+
+    if (confirm("¿Eliminar usuario?")) {
+
+        datos.usuarios.splice(index, 1);
+
+        guardar();
+
+        mostrarUsuarios();
+
+    }
+
+}
+
+
+function mostrarUsuarios() {
+
+    let html = `
+    <table>
+    <tr>
+        <th>Usuario</th>
+        <th>Rol</th>
+        <th>Acción</th>
+    </tr>
+    `;
+
+    datos.usuarios.forEach((u, index) => {
+
+        html += `
+        <tr>
+            <td>${u.usuario}</td>
+            <td>${u.rol}</td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarUsuario(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById("tablaUsuarios").innerHTML =
+        html;
+
+}
+
+
+function agregarMateria() {
+
+    let nombre =
+        document.getElementById("materiaNombre").value;
+
+    let docente =
+        document.getElementById("materiaDocente").value;
+
+    if (!nombre) {
+
+        alert("Escribe el nombre de la materia.");
+
+        return;
+
+    }
+
+    datos.materias.push({
+        nombre,
+        docente
+    });
+
+    guardar();
+
+    document.getElementById("materiaNombre").value = "";
+    document.getElementById("materiaDocente").value = "";
+
+    mostrarMaterias();
+    actualizarTodo();
+
+}
+
+
+function eliminarMateria(index) {
+
+    if (confirm("¿Eliminar materia?")) {
+
+        datos.materias.splice(index, 1);
+
+        guardar();
+
+        mostrarMaterias();
+        actualizarTodo();
+
+    }
+
+}
+
+
+function mostrarMaterias() {
+
+    let html = `
+    <table>
+    <tr>
+        <th>Materia</th>
+        <th>Docente</th>
+        <th>Acción</th>
+    </tr>
+    `;
+
+    datos.materias.forEach((m, index) => {
+
+        html += `
+        <tr>
+            <td>${m.nombre}</td>
+            <td>${m.docente}</td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarMateria(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById("tablaMaterias").innerHTML =
+        html;
+
+}
+
+
+function agregarCalificacion() {
+
+    let matricula =
+        document.getElementById("calMatricula").value;
+
+    let materia =
+        document.getElementById("calMateria").value;
+
+    let p1 =
+        document.getElementById("parcial1").value;
+
+    let p2 =
+        document.getElementById("parcial2").value;
+
+    let p3 =
+        document.getElementById("parcial3").value;
+
+    if (!matricula || !materia) {
+
+        alert("Completa matrícula y materia.");
+
+        return;
+
+    }
+
+    datos.calificaciones.push({
+
+        matricula,
+        materia,
+        parcial1: p1,
+        parcial2: p2,
+        parcial3: p3
+
+    });
+
+    guardar();
+
+    alert("Calificación guardada.");
+
+    mostrarCalificaciones();
+
+}
+
+
+function eliminarCalificacion(index) {
+
+    datos.calificaciones.splice(index, 1);
+
+    guardar();
+
+    mostrarCalificaciones();
+
+}
+
+
+function mostrarCalificaciones() {
+
+    let html = `
+    <table>
+    <tr>
+        <th>Matrícula</th>
+        <th>Materia</th>
+        <th>P1</th>
+        <th>P2</th>
+        <th>P3</th>
+        <th>Acción</th>
+    </tr>
+    `;
+
+    datos.calificaciones.forEach((c, index) => {
+
+        html += `
+        <tr>
+            <td>${c.matricula}</td>
+            <td>${c.materia}</td>
+            <td>${c.parcial1}</td>
+            <td>${c.parcial2}</td>
+            <td>${c.parcial3}</td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarCalificacion(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById(
+        "tablaCalificaciones"
+    ).innerHTML = html;
+
+}
+
+
+function agregarAsistencia() {
+
+    let matricula =
+        document.getElementById("asisMatricula").value;
+
+    let fecha =
+        document.getElementById("asisFecha").value;
+
+    let estado =
+        document.getElementById("asisEstado").value;
+
+    if (!matricula || !fecha) {
+
+        alert("Completa matrícula y fecha.");
+
+        return;
+
+    }
+
+    datos.asistencias.push({
+        matricula,
+        fecha,
+        estado
+    });
+
+    guardar();
+
+    mostrarAsistencias();
+
+}
+
+
+function eliminarAsistencia(index) {
+
+    datos.asistencias.splice(index, 1);
+
+    guardar();
+
+    mostrarAsistencias();
+
+}
+
+
+function mostrarAsistencias() {
+
+    let html = `
+    <table>
+    <tr>
+        <th>Matrícula</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Acción</th>
+    </tr>
+    `;
+
+    datos.asistencias.forEach((a, index) => {
+
+        html += `
+        <tr>
+            <td>${a.matricula}</td>
+            <td>${a.fecha}</td>
+            <td>${a.estado}</td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarAsistencia(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById(
+        "tablaAsistencias"
+    ).innerHTML = html;
+
+}
+
+
+function agregarHorario() {
+
+    datos.horarios.push({
+
+        grupo:
+            document.getElementById("horGrupo").value,
+
+        materia:
+            document.getElementById("horMateria").value,
+
+        dia:
+            document.getElementById("horDia").value,
+
+        inicio:
+            document.getElementById("horInicio").value,
+
+        fin:
+            document.getElementById("horFin").value
+
+    });
+
+    guardar();
+
+    mostrarHorarios();
+
+}
+
+
+function eliminarHorario(index) {
+
+    datos.horarios.splice(index, 1);
+
+    guardar();
+
+    mostrarHorarios();
+
+}
+
+
+function mostrarHorarios() {
+
+    let html = `
+    <table>
+    <tr>
+        <th>Grupo</th>
+        <th>Materia</th>
+        <th>Día</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Acción</th>
+    </tr>
+    `;
+
+    datos.horarios.forEach((h, index) => {
+
+        html += `
+        <tr>
+            <td>${h.grupo}</td>
+            <td>${h.materia}</td>
+            <td>${h.dia}</td>
+            <td>${h.inicio}</td>
+            <td>${h.fin}</td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarHorario(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById(
+        "tablaHorarios"
+    ).innerHTML = html;
+
+}
+
+
+function agregarSolicitud() {
+
+    let matricula =
+        document.getElementById("solMatricula").value;
+
+    let tipo =
+        document.getElementById("solTipo").value;
+
+    let fecha =
+        document.getElementById("solFecha").value;
+
+    let motivo =
+        document.getElementById("solMotivo").value;
+
+    if (!matricula || !tipo || !fecha) {
+
+        alert("Completa los datos.");
+
+        return;
+
+    }
+
+    datos.solicitudes.push({
+
+        matricula,
+        tipo,
+        fecha,
+        motivo,
+        estado: "Pendiente"
+
+    });
+
+    guardar();
+
+    alert("Solicitud registrada.");
+
+    mostrarSolicitudes();
+
+    actualizarTodo();
+
+}
+
+
+function eliminarSolicitud(index) {
+
+    datos.solicitudes.splice(index, 1);
+
+    guardar();
+
+    mostrarSolicitudes();
+
+    actualizarTodo();
+
+}
+
+
+function mostrarSolicitudes() {
+
+    let html = `
+    <table>
+    <tr>
+        <th>Matrícula</th>
+        <th>Tipo</th>
+        <th>Fecha</th>
+        <th>Motivo</th>
+        <th>Estado</th>
+        <th>Acción</th>
+    </tr>
+    `;
+
+    datos.solicitudes.forEach((s, index) => {
+
+        html += `
+        <tr>
+            <td>${s.matricula}</td>
+            <td>${s.tipo}</td>
+            <td>${s.fecha}</td>
+            <td>${s.motivo}</td>
+            <td>
+                <span class="tag">${s.estado}</span>
+            </td>
+            <td>
+                <button
+                class="btn-danger"
+                onclick="eliminarSolicitud(${index})">
+                Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById(
+        "tablaSolicitudes"
+    ).innerHTML = html;
+
+}
+
+
+function agregarCita() {
+
+    let matricula =
+        document.getElementById("citaMatricula").value;
+
+    let fecha =
+        document.getElementById("citaFecha").value;
+
+    let hora =
+        document.getElementById("citaHora").value;
+
+    let motivo =
+        document.getElementById("citaMotivo").value;
+
+    let area =
+        document.getElementById("citaArea").value;
+
+    if (!matricula || !fecha || !hora) {
+
+        alert("Completa matrícula, fecha y hora.");
+
+        return;
+
+    }
+
+    let existe = datos.citas.some(c =>
+        c.fecha === fecha &&
+        c.hora === hora
+    );
+
+    if (existe) {
+
+        alert("Ya existe una cita en esa fecha y hora.");
+
+        return;
+
+    }
+
+    datos.citas.push({
+
+        matricula,
+        fecha,
+        hora,
+        motivo,
+        area,
+        estado: "Pendiente"
+
+    });
+
+    guardar();
+
+    alert("Cita registrada correctamente.");
+
+    document.getElementById("citaMatricula").value = "";
+    document.getElementById("citaFecha").value = "";
+    document.getElementById("citaHora").value = "";
+    document.getElementById("citaMotivo").value = "";
+
+    mostrarCitas();
+
+    actualizarTodo();
+
+}
+
+
+function eliminarCita(index) {
+
+    if (confirm("¿Eliminar esta cita?")) {
+
+        datos.citas.splice(index, 1);
+
+        guardar();
+
+        mostrarCitas();
+
+        actualizarTodo();
+
+    }
+
+}
+
+
+function confirmarCita(index) {
+
+    datos.citas[index].estado = "Confirmada";
+
+    guardar();
+
+    mostrarCitas();
+
+}
+
+
+function cancelarCita(index) {
+
+    datos.citas[index].estado = "Cancelada";
+
+    guardar();
+
+    mostrarCitas();
+
+}
+
+
+function mostrarCitas() {
+
+    let buscar =
+        document.getElementById("buscarCita").value
+        .toLowerCase();
+
+    let lista = datos.citas.filter(c =>
+        c.matricula.toLowerCase().includes(buscar)
+    );
+
+    let html = `
+    <table>
+    <tr>
+        <th>Matrícula</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Motivo</th>
+        <th>Área</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+    </tr>
+    `;
+
+    lista.forEach(c => {
+
+        let index =
+            datos.citas.indexOf(c);
+
+        html += `
+        <tr>
+
+            <td>${c.matricula}</td>
+
+            <td>${c.fecha}</td>
+
+            <td>${c.hora}</td>
+
+            <td>${c.motivo}</td>
+
+            <td>${c.area}</td>
+
+            <td>
+                <span class="tag">
+                    ${c.estado}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                onclick="confirmarCita(${index})">
+                Confirmar
+                </button>
+
+                <button
+                class="btn-blue"
+                onclick="cancelarCita(${index})">
+                Cancelar
+                </button>
+
+                <button
+                class="btn-danger"
+                onclick="eliminarCita(${index})">
+                Eliminar
+                </button>
+
+            </td>
+
+        </tr>
+        `;
+
+    });
+
+    html += "</table>";
+
+    document.getElementById("tablaCitas").innerHTML =
+        html;
+
+}
+
+
+function actualizarTodo() {
+
+    mostrarAlumnos();
+    mostrarUsuarios();
+    mostrarMaterias();
+    mostrarCalificaciones();
+    mostrarAsistencias();
+    mostrarHorarios();
+    mostrarSolicitudes();
+    mostrarCitas();
+
+    document.getElementById("totalAlumnos")
+        .innerText = datos.alumnos.length;
+
+    document.getElementById("totalMaterias")
+        .innerText = datos.materias.length;
+
+    document.getElementById("totalSolicitudes")
+        .innerText = datos.solicitudes.length;
+
+    document.getElementById("totalCitas")
+        .innerText = datos.citas.length;
+
+    document.getElementById("repAlumnos")
+        .innerText = datos.alumnos.length;
+
+    document.getElementById("repMaterias")
+        .innerText = datos.materias.length;
+
+    document.getElementById("repSolicitudes")
+        .innerText = datos.solicitudes.length;
+
+    document.getElementById("repCitas")
+        .innerText = datos.citas.length;
+
+}
+
+
+actualizarTodo();
+
+</script>
+
+</body>
+</html>
